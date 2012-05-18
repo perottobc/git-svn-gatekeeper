@@ -14,3 +14,18 @@ This setup require.
 1. Apache HTTP Server installed: http://httpd.apache.org/
 2. Apache configured with mod-modules for making Apache a subversion server, e.g. from: http://sourceforge.net/projects/win32svn/
 3. Groovy, in order to run test scripts: http://groovy.codehaus.org/
+
+
+Extend the Apache httpd.conf with the following:
+
+<Location /svn-repos>
+  DAV svn
+  SVNParentPath %WDIR%\apache-httpd-svn-repos
+  SVNListParentPath on
+  AuthType Basic
+  AuthName "Subversion repository"
+  AuthUserFile %WDIR%\apache-httpd-svn-repos\svn-auth-file
+  Require valid-user
+</Location>
+
+
