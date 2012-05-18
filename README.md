@@ -11,7 +11,7 @@ And you can test it all with test-scripts
 
 This setup require.
 
-1. Apache HTTP Server installed: http://httpd.apache.org/
+1. Apache HTTP Server, found at: http://httpd.apache.org/
 2. Apache configured with mod-modules for making Apache a subversion server, e.g. from: http://sourceforge.net/projects/win32svn/
 3. Groovy, in order to run test scripts: http://groovy.codehaus.org/
 
