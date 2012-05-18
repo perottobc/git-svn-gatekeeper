@@ -7,6 +7,8 @@ This project creates a sample-setup with the following:
 - A git-bare repository for git devs for push/pull
 - A git-svn-gatekeeper that pulls changes from the bare and commits them to the subversion repository
 
+And you can test it all with test-scripts
+
 This setup require.
 
 1. Apache HTTP Server installed: http://httpd.apache.org/
