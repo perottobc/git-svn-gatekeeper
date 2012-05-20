@@ -3,8 +3,8 @@ git-svn-gatekeeper
 =================
 
 This project creates a sample-setup with the following:
-- A subversion repository that is considered the master VCS
-- A git-bare repository for git devs for push/pull
+- A Subversion repository that is considered the master VCS
+- A Git-bare repository for git devs for push/pull
 - A git-svn-gatekeeper that pulls changes from the bare and commits them to the subversion repository
 
 And you can test it all with test-scripts
@@ -28,4 +28,5 @@ Extend the Apache httpd.conf with the following:
   Require valid-user
 </Location>
 
+You need to replace %WDIR% with the value you set this property in the environment.
 
