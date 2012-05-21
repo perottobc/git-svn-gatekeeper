@@ -20,39 +20,22 @@ class GitRepo {
 }
 
 
-class Executables {
-	def String rootDir; 	
-	def ant = new AntBuilder();
-	
-	def git(String dir, String command,String ... arguments) {
-		def gitWorkingDir = rootDir + "/" + dir;		
-		println("GIT: " + command + " " + arguments + ", gitWorkingDir = " + gitWorkingDir );		
-		ant.exec(executable:"git",dir:gitWorkingDir, resultproperty:"cmdExit") {
-			arg(value:command)	
-			for( argument in arguments ) { 
-				arg(value:argument)
-			}
-		}
-		if( "0" != "${ant.project.properties.cmdExit}" ) throw new RuntimeException("Error executing ant command: " + command );
-		return this;						
-	}
-}
+class GatekeeperSetup {
+	String gatekeeperDir
 
-class GatekeeperSetup extends Executables {
-
-	def setup_gatekeeper_and_bare(String branchName, String svnUrl ) {
+	def setup_gatekeeper_and_bare(String branchName, String svnUrl ) {		
+		def gatekeeper = new GitRepo( repoDir : gatekeeperDir + "/" + branchName +".git.gatekeeper" )
+		gatekeeper.mkdir()
+		gatekeeper.git( "svn", "init", "--prefix", "svn/"+branchName+"/", svnUrl, "--username", "adm");
+		gatekeeper.git( "svn", "fetch" ) 		
+		gatekeeper.git( "branch", "-m", "master", branchName );
 		
-		def bareRepo = branchName + "_bare"
-		def gatekeeper = branchName +".git.gatekeeper";
+		def bare = new GitRepo( repoDir : gatekeeperDir + "/" + branchName + "_bare" ) 
+		bare.mkdir();
+		bare.git( "init", "--bare" )
 		
-		git( ".","svn", "clone", "--prefix", "svn/"+branchName+"/", svnUrl, gatekeeper, "--username", "adm");
-		git( gatekeeper, "branch", "-m", "master", branchName );
-				
-		ant.mkdir( dir: rootDir + "/" + bareRepo )
-		
-		git( bareRepo, "init", "--bare" )
-		git( gatekeeper,"remote" ,"add", "bare_repo", "../" + bareRepo )
-		git( gatekeeper, "push" ,"-u", "bare_repo", branchName )		
+		gatekeeper.git( "remote" ,"add", "bare_repo", bare.repoDir )
+		gatekeeper.git( "push" ,"-u", "bare_repo", branchName )		
 	}	
 }
 
@@ -75,16 +58,15 @@ class DevSetup {
 	}	
 }
 
-def devScript = new DevSetup(devDir:"E:/tmp/mult_bare/devs",bareReposDir:"E:/tmp/mult_bare/");
-/*
-def gatekeeperSetup = new GatekeeperSetup(rootDir:"E:/tmp/mult_bare/");
+
+String wdir = System.getenv()['WDIR'];
+
+def gatekeeperSetup = new GatekeeperSetup(gatekeeperDir: wdir + "/devs/adm" );
 gatekeeperSetup.setup_gatekeeper_and_bare("kaksi", "http://localhost/svn-repos/company-repo/websites/branches/kaksi")
 gatekeeperSetup.setup_gatekeeper_and_bare("yksi", "http://localhost/svn-repos/company-repo/websites/branches/yksi")
 gatekeeperSetup.setup_gatekeeper_and_bare("trunk", "http://localhost/svn-repos/company-repo/websites/trunk/")
 
-
+def devScript = new DevSetup(devDir: wdir + "/devs",bareReposDir: wdir + "/devs/adm" );
 for ( dev in ["per","siv","ola"] ) {
 	devScript.create_dev( dev )
 }
-*/
-devScript.create_dev( "kar4" )
