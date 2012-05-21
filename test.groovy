@@ -166,17 +166,12 @@ class Dev extends ScmExecutable {
 		return this;
 	}
 	
-	def gatekeeper_update_svn_from_bare(branch) {
-		
+	def gatekeeper_update_svn_from_bare(branch) {		
 		git( "checkout", branch )
 		git( "fetch", "bare_repo" )
-		git( "rebase", "remotes/bare_repo/svn/" + branch)
-		git( "svn", "reset", "2147483647" )
+		git( "rebase", "remotes/bare_repo/svn/" + branch)		
 		git( "svn", "rebase" )
 		git( "svn", "dcommit" )
-	
-		// Alternative, doesn't work, gets merge conflict on the second passgit 
-		// git( "fetch", "bare_repo" ).git( "checkout", "svn/" + branch ).git( "merge", "--no-ff","remotes/bare_repo/svn/trunk" ).git( "svn","dcommit");
 	}
 	
 	def assert_svn_file_exists( String file ) {
