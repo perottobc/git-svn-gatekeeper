@@ -19,7 +19,6 @@ class GitRepo {
 	}
 }
 
-
 class GatekeeperSetup {
 	String gatekeeperDir
 
