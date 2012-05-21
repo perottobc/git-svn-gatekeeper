@@ -3,12 +3,19 @@
 
 println( "SETUP: One bare pr branch" )
 
-class ScriptCommands {	
-	def ant = new AntBuilder();
+class ScriptCommands {
 
-	def git(String gitWorkingDir, String command,String ... arguments) {		
-		println("GIT: " + command + " " + arguments );		
-		ant.exec(executable:"git",dir:gitWorkingDir,resultproperty:"cmdExit") {
+	def String rootDir; 	
+	def ant = new AntBuilder();
+	
+	public ScriptCommands( String _rootDir ) {
+	   this.rootDir = _rootDir;
+	}
+
+	def git(String dir, String command,String ... arguments) {
+		def gitWorkingDir = rootDir + "/" + dir;		
+		println("GIT: " + command + " " + arguments + ", gitWorkingDir = " + gitWorkingDir );		
+		ant.exec(executable:"git",dir:gitWorkingDir, resultproperty:"cmdExit") {
 			arg(value:command)	
 			for( argument in arguments ) { 
 				arg(value:argument)
@@ -18,20 +25,19 @@ class ScriptCommands {
 		return this;						
 	}
 	
-	def create_dir( String parent, String dir ) {
-		ant.mkdir( dir: parent + "/" + dir )
+	def create_dir( String dir ) {
+		ant.mkdir( dir: rootDir + "/" + dir )
 	}
 }
 
-def script = new ScriptCommands();
+def script = new ScriptCommands("E:/tmp/mult_bare/ant");
 
-def mydir = "E:/tmp/mult_bare/ant"
+script.git( ".","svn", "clone", "--prefix", "svn/kaksi/", "http://localhost/svn-repos/myrepo/branches/kaksi", "kaksi.git.gatekeeper", "--username", "adm");
+script.git( "kaksi.git.gatekeeper", "branch", "-m", "master", "kaksi");
+script.create_dir( "kaksi_bare" )
+script.git( "kaksi_bare", "init", "--bare" )
+script.git( "kaksi.git.gatekeeper","remote" ,"add", "bare_repo", "../kaksi_bare" )
+script.git( "kaksi.git.gatekeeper", "push" ,"-u", "bare_repo", "kaksi" )
 
-script.git( mydir,"svn", "clone", "--prefix", "svn/kaksi/", "http://localhost/svn-repos/myrepo/branches/kaksi", "kaksi.git.gatekeeper", "--username", "adm");
-//script.git( mydir + "/kaksi.git.gatekeeper", "branch", "-m", "master", "kaksi");
-script.create_dir( mydir, "kaksi_bare" )
-script.git( mydir + "/kaksi_bare", "init", "--bare" )
-script.git( mydir + "/kaksi.git.gatekeeper","remote" ,"add", "bare_repo", "../kaksi_bare" )
-script.git( mydir + "/kaksi.git.gatekeeper", "push" ,"-u", "bare_repo", "master" )
-
-script.git( mydir, "clone", "kaksi_bare", "dev" )
+script.git( ".", "clone", "kaksi_bare", "dev" )
+script.git( "dev","checkout", "-t", "remotes/origin/kaksi")
