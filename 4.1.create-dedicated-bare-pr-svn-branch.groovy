@@ -1,3 +1,25 @@
+class GitRepo {
+	def String repoDir; 	
+	def ant = new AntBuilder();
+	
+	def mkdir() {
+		ant.mkdir( dir: repoDir )
+	}
+	
+	def git(String command,String ... arguments) {				
+		println("GIT: " + command + " " + arguments + ", repoDir = " + repoDir );		
+		ant.exec(executable:"git",dir:repoDir, resultproperty:"cmdExit") {
+			arg(value:command)	
+			for( argument in arguments ) { 
+				arg(value:argument)
+			}
+		}
+		if( "0" != "${ant.project.properties.cmdExit}" ) throw new RuntimeException("Error executing ant command: " + command );
+		return this;						
+	}
+}
+
+
 class Executables {
 	def String rootDir; 	
 	def ant = new AntBuilder();
@@ -31,41 +53,29 @@ class GatekeeperSetup extends Executables {
 		git( bareRepo, "init", "--bare" )
 		git( gatekeeper,"remote" ,"add", "bare_repo", "../" + bareRepo )
 		git( gatekeeper, "push" ,"-u", "bare_repo", branchName )		
-	}
-	
-	def create_dev(String dev ) {		
-		ant.mkdir( dir: rootDir + "/" + dev )
-		git( dev, "init" )		
-		git( dev, "config","user.name", dev )
-		git( dev, "config","user.email", dev +"@doit.com" )
-						
-		for ( branch in ["trunk","yksi","kaksi"] ) {
-		    git( dev, "remote", "add",branch+"_bare", "../"+branch+"_bare" )
-		    git( dev, "fetch", branch+"_bare" )
-		    git( dev, "checkout", "-t", branch+"_bare" + "/" + branch )
-		}				 	
 	}	
 }
 
-class DevSetup extends Executables {
+class DevSetup {
+	String devDir;
 	String bareReposDir;
 	
-	def create_dev(String dev ) {		
-		ant.mkdir( dir: rootDir + "/" + dev + "/git_websites" )
-		def repo = dev + "/git_websites"
-		git( repo, "init" )		
-		git( repo, "config","user.name", dev )
-		git( repo, "config","user.email", dev +"@doit.com" )
+	def create_dev(String dev ) {	
+		def repo = new GitRepo( repoDir : devDir + "/" + dev + "/git_websites" )		
+		repo.mkdir() 	
+		repo.git( "init" )		
+		repo.git( "config","user.name", dev )
+		repo.git( "config","user.email", dev +"@doit.com" )
 						
 		for ( branch in ["trunk","yksi","kaksi"] ) {
-		    git( repo, "remote", "add",branch+"_bare", bareReposDir + "/"+branch+"_bare" )
-		    git( repo, "fetch", branch+"_bare" )
-		    git( repo, "checkout", "-t", branch+"_bare" + "/" + branch )
+		    repo.git( "remote", "add",branch+"_bare", bareReposDir + "/"+branch+"_bare" )
+		    repo.git( "fetch", branch+"_bare" )
+		    repo.git( "checkout", "-t", branch+"_bare" + "/" + branch )
 		}				 	
 	}	
 }
 
-def devScript = new DevSetup(rootDir:"E:/tmp/mult_bare/devs",bareReposDir:"E:/tmp/mult_bare/");
+def devScript = new DevSetup(devDir:"E:/tmp/mult_bare/devs",bareReposDir:"E:/tmp/mult_bare/");
 /*
 def gatekeeperSetup = new GatekeeperSetup(rootDir:"E:/tmp/mult_bare/");
 gatekeeperSetup.setup_gatekeeper_and_bare("kaksi", "http://localhost/svn-repos/company-repo/websites/branches/kaksi")
@@ -77,5 +87,4 @@ for ( dev in ["per","siv","ola"] ) {
 	devScript.create_dev( dev )
 }
 */
-
-devScript.create_dev( "kar2" )
+devScript.create_dev( "kar4" )
