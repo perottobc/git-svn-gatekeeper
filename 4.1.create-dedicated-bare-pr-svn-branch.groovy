@@ -23,9 +23,10 @@ class ScriptCommands {
 	}
 	
 	def create_dir( String dir ) {
-		
+		ant.mkdir( dir: rootDir + "/" + dir )
 	}
-		
+	
+	
 	def setup_gatekeeper_and_bare(String branchName, String svnUrl ) {
 		
 		def bareRepo = branchName + "_bare"
@@ -33,35 +34,31 @@ class ScriptCommands {
 		
 		git( ".","svn", "clone", "--prefix", "svn/"+branchName+"/", svnUrl, gatekeeper, "--username", "adm");
 		git( gatekeeper, "branch", "-m", "master", branchName );
-				
-		ant.mkdir( dir: rootDir + "/" + bareRepo )
 		
+		create_dir( bareRepo )
 		git( bareRepo, "init", "--bare" )
 		git( gatekeeper,"remote" ,"add", "bare_repo", "../" + bareRepo )
-		git( gatekeeper, "push" ,"-u", "bare_repo", branchName )dir		
-	}
-	
-	def create_dev(String dev ) {		
-		ant.mkdir( dir: rootDir + "/" + dev )
-		git( dev, "init" )		
-		git( dev, "config","user.name", dev )
-		git( dev, "config","user.email", dev +"@doit.com" )
-						
-		for ( branch in ["trunk","yksi","kaksi"] ) {
-		    git( dev, "remote", "add",branch+"_bare", "../"+branch+"_bare" )
-		    git( dev, "fetch", branch+"_bare" )
-		    git( dev, "checkout", "-t", branch+"_bare" + "/" + branch )
-		}				 	
+		git( gatekeeper, "push" ,"-u", "bare_repo", branchName )
+		
+		//just for testing
+		def devRepo = "dev_" + branchName;		
+		git( ".", "clone", bareRepo, devRepo  )
+		git( devRepo,"checkout", "-t", "remotes/origin/" + branchName )	
 	}
 	
 }
 
 def script = new ScriptCommands("E:/tmp/mult_bare/ant");
-
+/*
+script.setup_gatekeeper_and_bare("kaksi", "http://localhost/svn-repos/myrepo/branches/kaksi")
+script.setup_gatekeeper_and_bare("yksi", "http://localhost/svn-repos/myrepo/branches/yksi")
+script.setup_gatekeeper_and_bare("trunk", "http://localhost/svn-repos/myrepo/trunk")
+*/
+/*
 script.setup_gatekeeper_and_bare("kaksi", "http://localhost/svn-repos/company-repo/websites/branches/kaksi")
 script.setup_gatekeeper_and_bare("yksi", "http://localhost/svn-repos/company-repo/websites/branches/yksi")
 script.setup_gatekeeper_and_bare("trunk", "http://localhost/svn-repos/company-repo/websites/trunk/")
+*/
 
-for ( dev in ["per","siv","ola"] ) {
-	script.create_dev( dev )
-}
+
+
