@@ -199,16 +199,6 @@ class Dev extends ScmExecutable {
 		repo.git( "svn", "rebase" )
 		repo.git( "svn", "dcommit" )				
 		
-/*		
-		git( "checkout", branch )
-		git( "fetch", "bare_repo" )
-		git( "rebase", "remotes/bare_repo/svn/" + branch)
-		git( "svn", "reset", "2147483647" )
-		git( "svn", "rebase" )
-		git( "svn", "dcommit" )
-*/	
-		// Alternative, doesn't work, gets merge conflict on the second passgit 
-		// git( "fetch", "bare_repo" ).git( "checkout", "svn/" + branch ).git( "merge", "--no-ff","remotes/bare_repo/trunk" ).git( "svn","dcommit");
 		return this;
 	}
 	

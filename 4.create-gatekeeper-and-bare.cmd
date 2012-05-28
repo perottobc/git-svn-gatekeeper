@@ -13,7 +13,9 @@ cd %WDIR%\devs\adm
 call git svn clone -s --prefix=svn/ http://localhost/svn-repos/company-repo/websites --username adm
 
 cd %WDIR%\devs\adm\websites
-REM call git reset --hard svn/trunk
+
+REM XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+call git reset --hard svn/trunk
 
 @echo ----------------------------------
 @echo  2. Create bare repo
@@ -25,7 +27,11 @@ call git init --bare
 @echo ----------------------------------
 @echo  3. Populate bare with content from gatekeeper 
 cd %WDIR%\devs\adm\websites
-REM cd\g*call git push --all ../websites.git
+
+REM XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+call git push --all ../websites.git
+
+
 call git push ../websites.git "refs/remotes/svn/*:refs/heads/svn/*"
   
 
